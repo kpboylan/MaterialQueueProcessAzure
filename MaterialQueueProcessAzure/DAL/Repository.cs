@@ -11,6 +11,7 @@ namespace MaterialQueueProcessAzure.DAL
 {
     public class Repository : IRepository
     {
+
         public void AddMaterial(Material material, ILogger<Worker> _logger, string _connString)
         {
             try
@@ -27,6 +28,7 @@ namespace MaterialQueueProcessAzure.DAL
                         command.Parameters.AddWithValue("@CurrentStock", material.CurrentStock);
                         command.Parameters.AddWithValue("@UOMID", material.UOMId);
                         command.Parameters.AddWithValue("@Active", material.Active);
+                        command.Parameters.AddWithValue("@CountryCode", material.CountryCode);
 
                         connection.Open();
 
@@ -38,7 +40,7 @@ namespace MaterialQueueProcessAzure.DAL
             }
             catch (Exception ex)
             {
-                _logger.LogInformation($"❌ SQL Server connection failed: {ex.Message}");
+                _logger.LogInformation("SQL Exception caught - Exception: {materialName} at: {time}", ex.Message, DateTimeOffset.Now);
             }
         }
     }

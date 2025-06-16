@@ -9,7 +9,7 @@ namespace MaterialQueueProcessAzure
     public class Worker : BackgroundService
     {
         private readonly ILogger<Worker> _logger;
-        private const string QueueName = "materialqueue";
+        private const string QueueName = "Material_Queue";
         private string _connString = string.Empty;
         private ServiceBusClient _client;
         private ServiceBusProcessor _processor;
@@ -17,11 +17,25 @@ namespace MaterialQueueProcessAzure
 
         public Worker(ILogger<Worker> logger, IConfiguration configuration, IRepository repository)
         {
-            _logger = logger;
-            _client = new ServiceBusClient(configuration.GetConnectionString("ServiceBusConn"));
-            _processor = _client.CreateProcessor(QueueName, new ServiceBusProcessorOptions()); 
-            _repository = repository;
+
+
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+
+            Console.WriteLine("Worker constructor started...");
+            Console.WriteLine("Queue to process: " + QueueName);
+
+            string serviceBusConn = configuration.GetConnectionString("ServiceBusConn");
             _connString = configuration.GetConnectionString("SqlConnString");
+
+            if (string.IsNullOrEmpty(serviceBusConn) || string.IsNullOrEmpty(_connString))
+            {
+                Console.WriteLine("One or more connection strings are missing.");
+                throw new ArgumentException("Missing required connection strings.");
+            }
+
+            _client = new ServiceBusClient(configuration.GetConnectionString("ServiceBusConn"));
+            _processor = _client.CreateProcessor(QueueName, new ServiceBusProcessorOptions());
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
