@@ -8,7 +8,7 @@ WORKDIR /src
 COPY ["MaterialQueueProcessAzure.csproj", "./"]
 RUN dotnet restore "./MaterialQueueProcessAzure.csproj"
 COPY . .
-WORKDIR "/src
+WORKDIR "/src"
 RUN dotnet build "./MaterialQueueProcessAzure.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
