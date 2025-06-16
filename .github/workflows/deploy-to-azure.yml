@@ -27,7 +27,7 @@ jobs:
 
     - name: Build Docker Image
       run: |
-        docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest .
+        docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest -f MaterialQueueProcessAzure/Dockerfile MaterialQueueProcessAzure .
 
     - name: Log in to ACR
       run: az acr login --name $ACR_NAME
