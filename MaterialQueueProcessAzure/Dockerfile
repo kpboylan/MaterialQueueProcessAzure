@@ -5,7 +5,7 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["MaterialQueueProcessAzure/MaterialQueueProcessAzure.csproj", "MaterialQueueProcessAzure/"]
+COPY ["MaterialQueueProcessAzure.csproj", "./"]
 RUN dotnet restore "./MaterialQueueProcessAzure/MaterialQueueProcessAzure.csproj"
 COPY . .
 WORKDIR "/src/MaterialQueueProcessAzure"
