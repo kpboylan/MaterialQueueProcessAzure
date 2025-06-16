@@ -6,7 +6,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["MaterialQueueProcessAzure.csproj", "./"]
-RUN dotnet restore "./MaterialQueueProcessAzure/MaterialQueueProcessAzure.csproj"
+RUN dotnet restore "./MaterialQueueProcessAzure.csproj"
 COPY . .
 WORKDIR "/src/MaterialQueueProcessAzure"
 RUN dotnet build "./MaterialQueueProcessAzure.csproj" -c $BUILD_CONFIGURATION -o /app/build
