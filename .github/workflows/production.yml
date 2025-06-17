@@ -3,6 +3,13 @@ name: Deploy to Production
 on:
   workflow_dispatch:
 
+env:
+  ACR_NAME: netcoredockerreg
+  IMAGE_NAME: materialqueueworker
+  RESOURCE_GROUP: DefaultResourceGroup-WEU
+  CONTAINER_NAME: materialqueueworker-aci
+  LOCATION: westeurope
+  
 jobs:
   deploy-prod:
     environment:

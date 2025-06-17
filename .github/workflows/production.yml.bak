@@ -55,5 +55,5 @@ jobs:
             --cpu 1 \
             --memory 1.5 \
             --environment-variables \
-              ConnectionStrings__ServiceBusConn='${{ secrets.SERVICE_BUS_CONNECTION_STRING }}' \
-              ConnectionStrings__SqlConnString='${{ secrets.SQL_CONNECTION_STRING }}'
+              ConnectionStrings__ServiceBusConn='${{ secrets.SERVICEBUS_CONN }}' \
+              ConnectionStrings__SqlConnString='${{ secrets.SQL_CONN }}'
