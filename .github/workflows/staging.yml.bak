@@ -11,7 +11,6 @@ env:
   RESOURCE_GROUP: DefaultResourceGroup-WEU
   CONTAINER_NAME: materialqueueworker-aci
   LOCATION: westeurope
-  ACR_LOGIN_SERVER: ${{ secrets.ACR_NAME }}.azurecr.io
 
 jobs:
   deploy-staging:
@@ -56,14 +55,13 @@ jobs:
       - name: Create new ACI for staging
         run: |
           az container create \
-            --resource-group DefaultResourceGroup-WEU \
-            --name $ACI_NAME \
-            --image $ACR_LOGIN_SERVER/$IMAGE_NAME:staging \
-            --registry-login-server $ACR_LOGIN_SERVER \
+            --resource-group $RESOURCE_GROUP \
+            --name $CONTAINER_NAME \
+            --image $ACR_NAME.azurecr.io/$IMAGE_NAME:latest \
+            --registry-login-server $ACR_NAME.azurecr.io \
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }} \
             --restart-policy Always \
-            --no-wait \
             --os-type Linux \
             --cpu 1 \
             --memory 1.5 \
