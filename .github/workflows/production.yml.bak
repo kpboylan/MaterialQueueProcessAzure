@@ -1,16 +1,18 @@
-name: Deploy to Staging
+name: Deploy to Production
 
 on:
-  push:
-    branches:
-      - staging
+  workflow_dispatch:
 
 jobs:
-  deploy-staging:
+  deploy-prod:
+    environment:
+      name: production   # Requires approval if configured in GitHub > Settings > Environments
+      url: https://portal.azure.com
+
     runs-on: ubuntu-latest
     env:
       IMAGE_NAME: materialqueueworker
-      ACI_NAME: materialqueueworker-staging
+      ACI_NAME: materialqueueworker-prod
       ACR_LOGIN_SERVER: ${{ secrets.ACR_NAME }}.azurecr.io
 
     steps:
@@ -28,22 +30,22 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:staging -f MaterialQueueProcessAzure/Dockerfile MaterialQueueProcessAzure
+          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:prod -f MaterialQueueProcessAzure/Dockerfile MaterialQueueProcessAzure
 
       - name: Push image to ACR
-        run: docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:staging
+        run: docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:prod
 
       - name: Delete old ACI (if exists)
         continue-on-error: true
         run: |
           az container delete --resource-group DefaultResourceGroup-WEU --name $ACI_NAME --yes
 
-      - name: Create new ACI for staging
+      - name: Create new ACI for production
         run: |
           az container create \
             --resource-group DefaultResourceGroup-WEU \
             --name $ACI_NAME \
-            --image $ACR_LOGIN_SERVER/$IMAGE_NAME:staging \
+            --image $ACR_LOGIN_SERVER/$IMAGE_NAME:prod \
             --registry-login-server $ACR_LOGIN_SERVER \
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }} \
@@ -53,5 +55,5 @@ jobs:
             --cpu 1 \
             --memory 1.5 \
             --environment-variables \
-              ConnectionStrings__ServiceBusConn='${{ secrets.SERVICEBUS_CONN }}' \
-              ConnectionStrings__SqlConnString='${{ secrets.SQL_CONN }}'
+              ConnectionStrings__ServiceBusConn='${{ secrets.SERVICE_BUS_CONNECTION_STRING }}' \
+              ConnectionStrings__SqlConnString='${{ secrets.SQL_CONNECTION_STRING }}'
