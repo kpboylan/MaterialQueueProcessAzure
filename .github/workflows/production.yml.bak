@@ -3,6 +3,13 @@ name: Deploy to Production
 on:
   workflow_dispatch:
 
+env:
+  ACR_NAME: netcoredockerreg
+  IMAGE_NAME: materialqueueworker
+  RESOURCE_GROUP: DefaultResourceGroup-WEU
+  CONTAINER_NAME: materialqueueworker-prod
+  LOCATION: westeurope
+  
 jobs:
   deploy-prod:
     environment:
@@ -25,32 +32,41 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Log in to ACR
-        run: |
-          echo ${{ secrets.ACR_PASSWORD }} | docker login $ACR_LOGIN_SERVER -u ${{ secrets.ACR_USERNAME }} --password-stdin
+        run: az acr login --name $ACR_NAME
 
       - name: Build Docker image
         run: |
-          docker build -t $ACR_LOGIN_SERVER/$IMAGE_NAME:prod -f MaterialQueueProcessAzure/Dockerfile MaterialQueueProcessAzure
+          docker build -t $ACR_NAME.azurecr.io/$IMAGE_NAME:latest -f MaterialQueueProcessAzure/Dockerfile MaterialQueueProcessAzure
 
       - name: Push image to ACR
-        run: docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:prod
+        run: docker push $ACR_NAME.azurecr.io/$IMAGE_NAME:latest
 
-      - name: Delete old ACI (if exists)
-        continue-on-error: true
+      - name: Check if ACI Exists and Delete if Needed
         run: |
-          az container delete --resource-group DefaultResourceGroup-WEU --name $ACI_NAME --yes
+          echo "Checking for existing container instance..."
+          set +e
+          az container show --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP > /dev/null 2>&1
+          EXISTS=$?
+          set -e
+          if [ $EXISTS -eq 0 ]; then
+            echo "Existing ACI found. Deleting it..."
+            az container delete --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP --yes --no-wait
+            echo "Waiting for deletion to complete..."
+            az container wait --deleted --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP
+          else
+            echo "No existing ACI found."
+          fi
 
       - name: Create new ACI for production
         run: |
           az container create \
-            --resource-group DefaultResourceGroup-WEU \
-            --name $ACI_NAME \
-            --image $ACR_LOGIN_SERVER/$IMAGE_NAME:prod \
-            --registry-login-server $ACR_LOGIN_SERVER \
+            --resource-group $RESOURCE_GROUP \
+            --name $CONTAINER_NAME \
+            --image $ACR_NAME.azurecr.io/$IMAGE_NAME:latest \
+            --registry-login-server $ACR_NAME.azurecr.io \
             --registry-username ${{ secrets.ACR_USERNAME }} \
             --registry-password ${{ secrets.ACR_PASSWORD }} \
             --restart-policy Always \
-            --no-wait \
             --os-type Linux \
             --cpu 1 \
             --memory 1.5 \
