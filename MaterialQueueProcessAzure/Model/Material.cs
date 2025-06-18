@@ -19,6 +19,6 @@ namespace MaterialQueueProcessAzure.Model
         public int UOMId { get; set; }
         public int MaterialType { get; set; }
 
-        public string? CountryCode { get; set; } = "UK";
+        public string? CountryCode { get; set; } = "IE";
     }
 }
