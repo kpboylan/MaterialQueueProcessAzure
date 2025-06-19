@@ -9,7 +9,7 @@ env:
   ACR_NAME: netcoredockerreg
   IMAGE_NAME: materialqueueworker
   RESOURCE_GROUP: DefaultResourceGroup-WEU
-  CONTAINER_NAME: materialqueueworker-aci
+  CONTAINER_NAME: materialqueueworker-staging
   LOCATION: westeurope
 
 jobs:
