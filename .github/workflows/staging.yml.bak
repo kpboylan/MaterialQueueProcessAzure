@@ -44,7 +44,7 @@ jobs:
           set -e
           if [ $EXISTS -eq 0 ]; then
             echo "Existing ACI found. Deleting it..."
-            az container delete --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP --yes --no-wait
+            az container delete --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP --yes
             echo "Waiting for deletion to complete..."
             az container wait --deleted --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP
           else

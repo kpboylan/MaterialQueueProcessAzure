@@ -43,10 +43,16 @@ jobs:
           EXISTS=$?
           set -e
           if [ $EXISTS -eq 0 ]; then
-            echo "Existing ACI found. Deleting it..."
-            az container delete --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP --yes
             echo "Waiting for deletion to complete..."
-            az container wait --deleted --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP
+            for i in {1..20}; do
+              az container show --name $CONTAINER_NAME --resource-group $RESOURCE_GROUP > /dev/null 2>&1
+              if [ $? -ne 0 ]; then
+                echo "Deletion complete."
+                break
+              fi
+              echo "Still deleting... waiting 10s"
+              sleep 10
+            done
           else
             echo "No existing ACI found."
           fi
